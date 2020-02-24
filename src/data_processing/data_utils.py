@@ -3,9 +3,9 @@ import numpy as np
 
 def getDays(year, quarter):
     if(year % 4 ==0):
-        return [_, 91, 91, 92, 92][quarter]
+        return [0, 91, 91, 92, 92][quarter]
     else:
-        return [_, 90, 91, 92, 92][quarter]
+        return [0, 90, 91, 92, 92][quarter]
 
 def getDate(year, month, day):
     if(year % 4 == 0):

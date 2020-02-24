@@ -6,8 +6,9 @@ import pandas as pd
 
 #Assumed data is per-region already
 def predict_data(data, end_year, end_quarter):
+    print("Calculating prediction data up to q{}/{}".format(end_quarter, end_year))
     new_data = dict()
-    feature_names = data['feature_names'][:]
+    #feature_names = data['feature_names'][:]
     
     
     food_df = data['food_df'].copy()
@@ -15,8 +16,8 @@ def predict_data(data, end_year, end_quarter):
     weather_df = data['weather_df'].copy()
     conflict_df = data['conflict_df'].copy()
     new_data['ipc_df'] = data['ipc_df'].copy()
-    end_month = [_, 3, 6, 9, 12][end_quarter]
-    end_day = [_, 31, 30, 30, 31][end_quarter]
+    end_month = [0, 3, 6, 9, 12][end_quarter]
+    end_day = [0, 31, 30, 30, 31][end_quarter]
     
     new_rows = []
     food_items = sorted(set(food_df.Item.values))
@@ -136,7 +137,11 @@ def predict_data(data, end_year, end_quarter):
                 
     weather_df = weather_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['weather_df'] = weather_df
-    
+
+    new_data["_food_items"] = food_items
+    new_data["_ffood_items"] = ffood_items
+
+    """
     datasets = copy.deepcopy(data['datasets'])
     
     last_date = max(datasets.keys())
@@ -170,5 +175,6 @@ def predict_data(data, end_year, end_quarter):
             dataset['features'] = features
             datasets[new_year*10+new_quarter] = dataset
     new_data['datasets'] = datasets
+    """
     return new_data
         
