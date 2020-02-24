@@ -3,6 +3,7 @@ from data_processing.data_utils import *
 import pandas as pd
 from config import DATA_DIR
 
+
 def load_data(regions):
 
     print("Loading data for all regions")
@@ -13,7 +14,6 @@ def load_data(regions):
         data_by_region[region] = get_famine_data(region)
 
     return data_by_region
-
 
 
 def calculate_datasets(regions, data_by_region):

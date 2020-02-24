@@ -31,6 +31,7 @@ def region_to_json(region):
             r_pd[k] = str(v)
     return (r_hd, r_pd)
 
+
 class AllDataEndpoint(Resource):
 
     def get(self):
@@ -38,8 +39,12 @@ class AllDataEndpoint(Resource):
         historical_data = dict()
         predicted_data = dict()
 
-        for region in store().FITTED_REGIONS:
-            historical_data[region], predicted_data[region] = region_to_json(region)
+        for region in REGIONS:
+            if region in store().FITTED_REGIONS:
+                historical_data[region], predicted_data[region] = region_to_json(region)
+            else:
+                historical_data[region] = {}
+                predicted_data[region] = {}
 
         response = dict(
             success = True,
@@ -49,6 +54,7 @@ class AllDataEndpoint(Resource):
         return response
 
 class GetRegionDataEndpoint(Resource):
+
     def get(self, region):
         if region not in REGIONS:
             return dict(success = False, error="Region does not exist")
@@ -66,6 +72,7 @@ class GetRegionDataEndpoint(Resource):
             predicted_data=predicted_data
         )
         return response
+
 
 class RegionsListEndpoint(Resource):
 

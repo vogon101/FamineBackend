@@ -1,11 +1,10 @@
-from Store import Store
 from data_processing.famine_processing import load_data, calculate_datasets,get_famine_data
 from modelling.StanModel import StanModel
 from data_processing.data_prediction import predict_data
 from config import REGIONS
 
 
-class FamineStore(Store):
+class FamineStore(object):
 
     FITTED_REGIONS = []
 
@@ -14,7 +13,7 @@ class FamineStore(Store):
     per_region_model = None
     features = None
 
-    prediction_date = (1, 2020)
+    prediction_date = (1, 2022)
     per_region_pred_data = dict()
     pre_region_pred_datasets = dict()
 
@@ -64,5 +63,3 @@ class FamineStore(Store):
         for x in REGIONS:
             if x not in self.FITTED_REGIONS:
                 print("- {}".format(x))
-
-        Store.__init__(self, "FamineStore", self.per_region_model, self.per_region_data)
