@@ -72,13 +72,6 @@ def get_famine_data(region):
     data['feature_names'] = feature_names
     
     
-    def getDays(year, quarter):
-        if(year % 4 ==0):
-            return [_, 91, 91, 92, 92][quarter]
-        else:
-            return [_, 90, 91, 92, 92][quarter]
-    
-    
     for (i,row) in ipc_df.iterrows():
         year = row.Year
         quarter = row.Quarter
