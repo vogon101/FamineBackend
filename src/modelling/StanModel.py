@@ -34,7 +34,7 @@ class StanModel(object):
     def fit(self):
         return self.__fit
 
-    def get_fit(self, dataid, iters=1000, chains=4):
+    def get_fit(self, dataid, iters=1000, chains=4, control = dict()):
         uuid = dataid + "_" + self.code_hash
         if self.fit is not None and self.fit.uuid == uuid:
             return self.fit
@@ -45,7 +45,7 @@ class StanModel(object):
                 print("Failed to load fit with exception " + str(e))
                 if self.fit_data is not None:
                     print("Attempting to fit the model from given data")
-                    self.__fit = StanModelFit.StanModelFit.FromCalulation(self, uuid, iters, chains)
+                    self.__fit = StanModelFit.StanModelFit.FromCalculation(self, uuid, iters, chains, control)
                 else:
                     raise Exception("Data not available for fitting model")
         return self.fit
