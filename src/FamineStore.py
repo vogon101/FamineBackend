@@ -1,10 +1,6 @@
 from Store import Store
-import numpy as np
-import datetime as dt
-import pandas as pd
 from data_processing.famine_processing import load_data, calculate_datasets,get_famine_data
 from modelling.StanModel import StanModel
-from config import *
 from data_processing.data_prediction import predict_data
 
 
