@@ -20,6 +20,7 @@ class FamineApp(object):
 
         api.add_resource(RegionsListEndpoint, '/data/region_list')
         api.add_resource(AllDataEndpoint, '/data/all')
+        api.add_resource(GetRegionDataEndpoint, '/data/region/<string:region>')
 
         f_app.run(debug=True, use_reloader=True)
 

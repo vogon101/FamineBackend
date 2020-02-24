@@ -2,11 +2,11 @@ from Store import Store
 from data_processing.famine_processing import load_data, calculate_datasets,get_famine_data
 from modelling.StanModel import StanModel
 from data_processing.data_prediction import predict_data
+from config import REGIONS
 
 
 class FamineStore(Store):
 
-    REGIONS = ['Awdal']#['Awdal', 'Bakool', 'Banadir', 'Bari', 'Bay', 'Galgaduud', 'Gedo', 'Hiraan', 'Lower Juba', 'Lower Shabelle', 'Middle Juba', 'Middle Shabelle', 'Mudug', 'Nugaal', 'Sanaag', 'Sool', 'Togdheer', 'Woqooyi Galbeed']
     FITTED_REGIONS = []
 
     per_region_data = None
@@ -20,10 +20,10 @@ class FamineStore(Store):
 
     def __init__(self):
         self.per_region_model = dict()
-        self.per_region_data = load_data(self.REGIONS)
-        self.per_region_datasets = calculate_datasets(self.REGIONS, self.per_region_data)
+        self.per_region_data = load_data(REGIONS)
+        self.per_region_datasets = calculate_datasets(REGIONS, self.per_region_data)
 
-        for region in self.REGIONS:
+        for region in REGIONS:
             if self.per_region_data[region]:
                 datasets = self.per_region_datasets[region]
                 dates = sorted(datasets.keys())
@@ -61,7 +61,7 @@ class FamineStore(Store):
         for x in self.FITTED_REGIONS:
             print("- {}".format(x))
         print("Skipped regions:")
-        for x in self.REGIONS:
+        for x in REGIONS:
             if x not in self.FITTED_REGIONS:
                 print("- {}".format(x))
 
