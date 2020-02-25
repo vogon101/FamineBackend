@@ -6,7 +6,7 @@ def predict_famine(fit, predicted_data, nqs, iterations):
     print(predicted_data.keys())
 
 if __name__ == "__main__":
-    os.chdir("..")
+    os.chdir("")
     store = FamineStore()
     print(store.per_region_model["Awdal"].fit.fit)
 
