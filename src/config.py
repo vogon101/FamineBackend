@@ -1,8 +1,10 @@
-STAN_FIT_DIR = "stan\\fits\\"
-STAN_MODEL_DIR = "stan\\src\\"
-STAN_MODEL_CACHE = "stan\\model-cache"
+import os
 
-DATA_DIR = "..\\data\\"
+STAN_FIT_DIR = "stan{}fits{}".format(os.sep, os.sep)
+STAN_MODEL_DIR = "stan{}src{}".format(os.sep, os.sep)
+STAN_MODEL_CACHE = "stan{}model-cache".format(os.sep)
+
+DATA_DIR = "..{}data{}".format(os.sep, os.sep)
 
 DEVELOPMENT_MODE = True
 REGIONS = ['Awdal', 'Gedo'] if DEVELOPMENT_MODE else\
