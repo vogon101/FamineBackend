@@ -7,15 +7,16 @@ import pandas as pd
 #Assumed data is per-region already
 def predict_data(data, end_year, end_quarter):
     print("Calculating prediction data up to q{}/{}".format(end_quarter, end_year))
-    new_data = dict()
-    #feature_names = data['feature_names'][:]
+    new_data = copy.deepcopy(data)
+    food_df = new_data['food_df']
+    ffood_df = new_data['ffood_df']
+    weather_df = new_data['weather_df']
+    conflict_df = new_data['conflict_df']
+    
+    new_data["_end_year"] = end_year
+    new_data["_end_quarter"] = end_quarter
     
     
-    food_df = data['food_df'].copy()
-    ffood_df = data['ffood_df'].copy()
-    weather_df = data['weather_df'].copy()
-    conflict_df = data['conflict_df'].copy()
-    new_data['ipc_df'] = data['ipc_df'].copy()
     end_month = [0, 3, 6, 9, 12][end_quarter]
     end_day = [0, 31, 30, 30, 31][end_quarter]
     
@@ -137,7 +138,6 @@ def predict_data(data, end_year, end_quarter):
                 
     weather_df = weather_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['weather_df'] = weather_df
-
     new_data["_food_items"] = food_items
     new_data["_ffood_items"] = ffood_items
 
