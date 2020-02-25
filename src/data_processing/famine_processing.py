@@ -90,6 +90,7 @@ def get_famine_data(region):
 
     feature_names = []
 
+    ## Food Data
     food_df = pd.read_csv(DATA_DIR + 'clean_food.csv')
     food_df = food_df[food_df.Region.eq(region)]
     data['food_df'] = food_df
@@ -105,6 +106,7 @@ def get_famine_data(region):
     l_y = max(food_df.Year.values)
     l_q = max(food_df[food_df.Year.eq(l_y)].Quarter.values)
 
+    ## FFood Data
     ffood_df = pd.read_csv(DATA_DIR + 'clean_fews.csv')
     ffood_df = ffood_df[ffood_df.Item.isin(WANTEDFEWSFOOD) & ffood_df.Region.eq(region)]
     ffood_df = ffood_df[(ffood_df.Year.eq(e_y) & ffood_df.Quarter.ge(e_q)) | (ffood_df.Year.gt(e_y))]
@@ -116,10 +118,28 @@ def get_famine_data(region):
         market = ffood_df[ffood_df.Item.eq(ffood_item)].Market.values[0]
         feature_names.append("{} - {}".format(ffood_item, market))
 
+    ## Conflict Data
     conflict_df = pd.read_csv(DATA_DIR + "clean_conflict.csv")
     conflict_df = conflict_df[conflict_df.Region.eq(region)]
     conflict_df = conflict_df[(conflict_df.Year.eq(e_y) & conflict_df.Quarter.ge(e_q)) | (conflict_df.Year.gt(e_y))]
     conflict_df = conflict_df[(conflict_df.Year.eq(l_y) & conflict_df.Quarter.le(l_q)) | (conflict_df.Year.lt(l_y))]
+    # Aggregate over months
+    conflict_df = conflict_df.groupby(["Region", "Year", "Month"], as_index=False).sum()
+    conflict_df.Date = conflict_df.Year + (conflict_df.Month - 1) / 12
+    conflict_df.Quarter = conflict_df.Month // 4 + 1
+    conflict_df = conflict_df[["Region", "Year", "Month", "Date", "Fatalities", "Quarter"]]
+    conflict_df = conflict_df.set_index(["Region", "Year", "Month"])
+
+    # Fill in missing months with 0s
+    for year in conflict_df.index.get_level_values(1).unique():
+        for month in range(1, 13):
+            try:
+                conflict_df.loc[region, year, month]
+            except KeyError:
+                conflict_df.loc[region, year, month] = (year + (month - 1) / 12, 0, month // 4 + 1)
+
+    conflict_df = conflict_df.sort_values(by="Date")
+    conflict_df = conflict_df.reset_index()
     data['conflict_df'] = conflict_df
 
     feature_names.append("Fatalities")

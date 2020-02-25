@@ -13,7 +13,7 @@ class FamineStore(object):
     per_region_model = None
     features = None
 
-    prediction_date = (1, 2022)
+    prediction_date = (1, 2021)
     per_region_pred_data = dict()
     pre_region_pred_datasets = dict()
 
