@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 from FamineStore import FamineStore
 from multiprocessing import freeze_support
 
-from DataEndpoints import *
+from api.DataEndpoints import *
 
 
 class FamineApp(object):

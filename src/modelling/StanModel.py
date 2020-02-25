@@ -1,8 +1,8 @@
 import pystan
-from stan_utils import StanModel_cache
+from modelling.stan_utils import StanModel_cache
 import pickle
 from config import *
-import StanModelFit
+from modelling import StanModelFit
 
 
 class StanModel(object):
