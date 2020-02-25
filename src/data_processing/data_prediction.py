@@ -10,7 +10,6 @@ def predict_data(data, end_year, end_quarter):
     new_data = dict()
     #feature_names = data['feature_names'][:]
     
-    
     food_df = data['food_df'].copy()
     ffood_df = data['ffood_df'].copy()
     weather_df = data['weather_df'].copy()
@@ -18,7 +17,7 @@ def predict_data(data, end_year, end_quarter):
     new_data['ipc_df'] = data['ipc_df'].copy()
     end_month = [0, 3, 6, 9, 12][end_quarter]
     end_day = [0, 31, 30, 30, 31][end_quarter]
-    
+    print(conflict_df)
     new_rows = []
     food_items = sorted(set(food_df.Item.values))
     for item in food_items:
@@ -85,27 +84,20 @@ def predict_data(data, end_year, end_quarter):
     region = conflict_df.Region.values[0]
     last_year = max(conflict_df.Year.values)
     last_month = max(conflict_df[conflict_df.Year.eq(last_year)].Month.values)
-    last_day = max(conflict_df[conflict_df.Year.eq(last_year) & conflict_df.Month.eq(last_month)].Day.values)
-    last_fatality = conflict_df.loc[conflict_df.Year.eq(last_year) & conflict_df.Month.eq(last_month) & conflict_df.Day.eq(last_day)].Fatalities.values[0]
+    last_fatality = conflict_df.loc[conflict_df.Year.eq(last_year) & conflict_df.Month.eq(last_month)].Fatalities.values[0]
     
     for new_year in range(last_year, end_year+1):
         month_start = last_month+1 if new_year == last_year else 1
         month_end = end_month+1 if new_year == end_year else 13
         for new_month in range(month_start, month_end):
-            day_start = last_day+1 if (new_year == last_year and new_month == last_month) else 1
-            day_end = end_day+1 if (new_year == end_year and new_month == end_month) else MONTHS[new_month]+1
-            if(new_month == 2 and new_year%4 == 0):
-                day_end+=1
-            for new_day in range(day_start, day_end):
-                new_rows.append(dict(
-                    Region = region,
-                    Date = getDate(new_year, new_month, new_day),
-                    Fatalities = last_fatality,
-                    Year = new_year,
-                    Month = new_month,
-                    Day = new_day,
-                    Quarter = math.ceil(new_month/3)
-                ))
+            new_rows.append(dict(
+                Region = region,
+                Date = getDate(new_year, new_month, 1),
+                Fatalities = last_fatality,
+                Year = new_year,
+                Month = new_month,
+                Quarter = math.ceil(new_month/3)
+            ))
     conflict_df = conflict_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['conflict_df'] = conflict_df
     
@@ -113,28 +105,20 @@ def predict_data(data, end_year, end_quarter):
     station = weather_df.Station.values[0]
     last_year = max(weather_df.Year.values)
     last_month = max(weather_df[weather_df.Year.eq(last_year)].Month.values)
-    last_day = max(weather_df[weather_df.Year.eq(last_year) & weather_df.Month.eq(last_month)].Day.values)
-    last_temperature = weather_df[weather_df.Year.eq(last_year) & weather_df.Month.eq(last_month) & weather_df.Day.eq(last_day)].Temperature.values[0]
+    last_temperature = weather_df[weather_df.Year.eq(last_year) & weather_df.Month.eq(last_month)].Temperature.values[0]
     
     for new_year in range(last_year, end_year+1):
         month_start = last_month+1 if new_year == last_year else 1
         month_end = end_month+1 if new_year == end_year else 13
         for new_month in range(month_start, month_end):
-            day_start = last_day+1 if (new_year == last_year and new_month == last_month) else 1
-            day_end = end_day+1 if (new_year == end_year and new_month == end_month) else MONTHS[new_month]+1
-            if(new_month == 2 and new_year%4 == 0):
-                day_end+=1
-            for new_day in range(day_start, day_end):
-                new_rows.append(dict(
-                    Station = station,
-                    Date = getDate(new_year, new_month, new_day),
-                    Temperature = last_temperature,
-                    Year = new_year,
-                    Month = new_month,
-                    Day = new_day,
-                    Quarter = math.ceil(new_month/3)
-                ))
-                
+            new_rows.append(dict(
+                Station = station,
+                Date = getDate(new_year, new_month, 1),
+                Temperature = last_temperature,
+                Year = new_year,
+                Month = new_month,
+                Quarter = math.ceil(new_month/3)
+            ))    
     weather_df = weather_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['weather_df'] = weather_df
 

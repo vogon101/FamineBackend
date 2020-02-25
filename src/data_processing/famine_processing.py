@@ -70,7 +70,7 @@ def calculate_datasets(regions, data_by_region):
             t_weather_df = weather_df[weather_df.Year.eq(year) & weather_df.Quarter.eq(quarter)]
             cycle = 1
 
-            while (len(t_weather_df) < 10):
+            while (len(t_weather_df) != 3):
                 t_weather_df = weather_df[weather_df.Year.eq(year + cycle) & weather_df.Quarter.eq(quarter)]
                 cycle += 1
             # dataset["Temperature"] = t_weather_df
@@ -123,24 +123,27 @@ def get_famine_data(region):
     conflict_df = conflict_df[conflict_df.Region.eq(region)]
     conflict_df = conflict_df[(conflict_df.Year.eq(e_y) & conflict_df.Quarter.ge(e_q)) | (conflict_df.Year.gt(e_y))]
     conflict_df = conflict_df[(conflict_df.Year.eq(l_y) & conflict_df.Quarter.le(l_q)) | (conflict_df.Year.lt(l_y))]
+    
     # Aggregate over months
-    conflict_df = conflict_df.groupby(["Region", "Year", "Month"], as_index=False).sum()
-    conflict_df.Date = conflict_df.Year + (conflict_df.Month - 1) / 12
-    conflict_df.Quarter = conflict_df.Month // 4 + 1
-    conflict_df = conflict_df[["Region", "Year", "Month", "Date", "Fatalities", "Quarter"]]
-    conflict_df = conflict_df.set_index(["Region", "Year", "Month"])
+    monthly_conflict_df = pd.DataFrame(columns=["Region", "Date", "Fatalities", "Year", "Month", "Quarter"])
+    for year in range(e_y, l_y):
+        f_q = e_q if year == e_y else 1
+        s_q = l_q if year == l_y else 4
+        for quarter in range(f_q, s_q+1):
+            for month in range((quarter-1)*3+1, quarter*3+1):
+                month_df = conflict_df[conflict_df.Year.eq(year) & conflict_df.Month.eq(month)]
+                new_row = dict(
+                        Region = region,
+                        Year = year,
+                        Month = month,
+                        Quarter = quarter,
+                        Date = getDate(year, month, 1),
+                        Fatalities = sum(month_df.Fatalities.values)
+                    )
+                monthly_conflict_df = monthly_conflict_df.append(new_row, ignore_index = True)
 
-    # Fill in missing months with 0s
-    for year in conflict_df.index.get_level_values(1).unique():
-        for month in range(1, 13):
-            try:
-                conflict_df.loc[region, year, month]
-            except KeyError:
-                conflict_df.loc[region, year, month] = (year + (month - 1) / 12, 0, month // 4 + 1)
-
-    conflict_df = conflict_df.sort_values(by="Date")
-    conflict_df = conflict_df.reset_index()
-    data['conflict_df'] = conflict_df
+    monthly_conflict_df = monthly_conflict_df.sort_values(by="Date")
+    data['conflict_df'] = monthly_conflict_df
 
     feature_names.append("Fatalities")
 
@@ -154,7 +157,47 @@ def get_famine_data(region):
     weather_df = weather_df[weather_df.Station.isin(WANTEDSTATIONS)]
     weather_df = weather_df[(weather_df.Year.eq(e_y) & weather_df.Quarter.ge(e_q)) | (weather_df.Year.gt(e_y))]
     weather_df = weather_df[(weather_df.Year.eq(l_y) & weather_df.Quarter.le(l_q)) | (weather_df.Year.lt(l_y))]
-    data['weather_df'] = weather_df
+    
+    
+    w_e_y = min(weather_df.Year.values)
+    w_e_q = min(weather_df[weather_df.Year.eq(w_e_y)].Quarter.values)
+    w_l_y = max(weather_df.Year.values)
+    w_l_q = max(weather_df[weather_df.Year.eq(w_l_y)].Quarter.values)
+    
+    prev_temp = np.nan
+    first_temp = np.nan
+    nan_dates = []
+    monthly_weather_df = pd.DataFrame(columns=["Station", "Date","Temperature", "Year", "Month", "Quarter"])
+    for year in range(w_e_y, w_l_y+1):
+        f_q = w_e_q if year == w_e_y else 1
+        s_q = w_l_q if year==w_l_y else 4
+        for quarter in range(f_q, s_q+1):
+            for month in range((quarter-1)*3+1, quarter*3+1):
+                month_df = weather_df[weather_df.Year.eq(year) & weather_df.Month.eq(month)]
+                avg_temp = np.mean(month_df.Temperature.values)
+                if(np.isnan(avg_temp)):
+                    if(np.isnan(prev_temp)):
+                        nan_dates.append(getDate(year,month,1))
+                    else:
+                        avg_temp = prev_temp
+                else:
+                    if(np.isnan(first_temp)):
+                        first_temp = avg_temp
+                new_row = dict(
+                    Station = list(WANTEDSTATIONS)[0],
+                    Date = getDate(year,month,1),
+                    Temperature = avg_temp,
+                    Year = year,
+                    Month = month,
+                    Quarter = quarter
+                )
+                monthly_weather_df = monthly_weather_df.append(new_row, ignore_index = True)
+                prev_temp = avg_temp
+    for date in nan_dates:
+        monthly_weather_df.at[monthly_weather_df.Date.eq(date), 'Temperature'] = first_temp
+        
+    monthly_weather_df = monthly_weather_df.sort_values(by="Date")
+    data['weather_df'] = monthly_weather_df
 
     feature_names.append("Temperature")
 
