@@ -33,14 +33,11 @@ def to_json_string(obj) -> str:
             s = s[:-2] + " }"
         return s
 
+    elif isinstance(obj, tuple):
+        return "[" + ",".join([to_json_string(x) for x in obj]) + "]"
+
     elif isinstance(obj, list):
-        if len(obj) == 0:
-            return "[]"
-        s = "["
-        for v in obj:
-            s += "{}, ".format(to_json_string(v))
-        s = s[:-2] + "]"
-        return s
+        return "[" + ", ".join([to_json_string(x) for x in obj]) + "]"
 
     elif isinstance(obj, pd.DataFrame):
         return df_to_json(obj)

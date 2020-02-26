@@ -24,6 +24,7 @@ class FamineApp(object):
         api.add_resource(GetRegionDataEndpoint, '/data/region/<string:region>')
 
         api.add_resource(RegionPredictionEndpoint, '/prediction/region/<string:region>')
+        api.add_resource(PredictionSummaryEndpoint, '/prediction/summary')
 
         f_app.run(debug=True, use_reloader=True)
 

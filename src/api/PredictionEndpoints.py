@@ -1,11 +1,13 @@
 from flask_restful import Resource, reqparse
 from flask import Response
-from utils.utils import store, app
+from utils.utils import store
 from copy import deepcopy
 import utils.DataFrameConverters as dfcs
 import famine_prediction
 from data_processing import famine_processing
 import pandas as pd
+from config import REGIONS
+
 
 # TODO: Merge this with DataEndpoints
 def transform_data(region_pred, region):
@@ -32,6 +34,7 @@ def transform_data(region_pred, region):
                 res[k] = v
     return r_pd
 
+
 def transform_data_back(data, region):
     res = dict()
 
@@ -54,7 +57,6 @@ def transform_data_back(data, region):
             res[k] = v
         elif k in data["_food_item_names"]:
             # Build food_df
-            print(v)
             food_df = food_df.append(v, ignore_index=True)
         elif k in data["_ffood_item_names"]:
             # Build ffood_df
@@ -62,13 +64,34 @@ def transform_data_back(data, region):
         else:
             res[k] = v
 
-    print(food_df)
     res["food_df"] = food_df
     res["ffood_df"] = ffood_df
 
     return res
 
 
+def predict_region(region, changes):
+    data = store().per_region_pred_data[region].copy()
+    if len(changes) != 0:
+        for (k, v) in data.items():
+            data[k] = deepcopy(v)
+        data = transform_data(data, region)
+
+        for change in changes:
+            print("Changing {} @ {},{} to {}".format(*change.values()))
+            df = data[change["source"]]
+            df2 = df[df.Year == change["year"]]
+            df2 = df2[df2.Month == change["month"]]
+            df[change["column"]][df2.index[0]] = change["value"]
+
+        data = transform_data_back(data, region)
+
+    res = famine_prediction.predict_famine(
+        store().per_region_model[region].fit.fit,
+        famine_processing.calculate_datasets([region], {region: data})[region]
+    )
+
+    return res
 
 
 class RegionPredictionEndpoint(Resource):
@@ -78,35 +101,64 @@ class RegionPredictionEndpoint(Resource):
         self.reqparse.add_argument("changes", type=list, location="json", required=True)
         super(RegionPredictionEndpoint, self).__init__()
 
-    def post(self, region):
-        args = self.reqparse.parse_args()
-        changes = args["changes"]
 
-        print(changes)
-        data = store().per_region_pred_data[region].copy()
-        if len(changes) != 0:
-            for (k, v) in data.items():
-                data[k] = deepcopy(v)
-            data = transform_data(data, region)
 
-            for change in changes:
-                print("Changing {} @ {},{} to {}".format(*change.values()))
-                df = data[change["source"]]
-                df2 = df[df.Year == change["year"]]
-                df2 = df2[df2.Month == change["month"]]
-                df[change["column"]][df2.index[0]] = change["value"]
+    def get(self, region):
 
-            data = transform_data_back(data, region)
+        if region not in REGIONS:
+            return dict(success=False, error="Region does not exist")
 
-        res = famine_prediction.predict_famine(
-            store().per_region_model[region].fit.fit,
-            famine_processing.calculate_datasets([region], {region:data})[region]
-        )
+        if region not in store().FITTED_REGIONS:
+            return dict(success=False, error="Region not fitted: not enough data")
 
         response = dict(
             success=True,
             region=region,
-            data=res
+            data=predict_region(region, [])
+        )
+
+        return Response(dfcs.to_json_string(response), mimetype="application/json")
+
+    def post(self, region):
+
+        if region not in REGIONS:
+            return dict(success=False, error="Region does not exist")
+
+        if region not in store().FITTED_REGIONS:
+            return dict(success=False, error="Region not fitted: not enough data")
+
+        args = self.reqparse.parse_args()
+        changes = args["changes"]
+
+        print(changes)
+
+        response = dict(
+            success=True,
+            region=region,
+            data=predict_region(region, changes)
+        )
+
+        return Response(dfcs.to_json_string(response), mimetype="application/json")
+
+
+class PredictionSummaryEndpoint(Resource):
+
+    def get(self):
+
+        region_json = dict()
+
+        for region in REGIONS:
+            if region in store().FITTED_REGIONS:
+                region_json[region] = dict(
+                    fitted=True,
+                    data=predict_region(region, [])
+                )
+            else:
+                region_json[region] = dict(fitted=False)
+
+        response = dict(
+            success=True,
+            data=region_json
         )
 
         return Response(dfcs.to_json_string(response), mimetype="application/json")

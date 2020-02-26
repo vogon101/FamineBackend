@@ -88,7 +88,7 @@ def calculate_datasets(regions, data_by_region):
                 dataset['features'] = features
                 datasets[year * 10 + quarter] = dataset
         datasets_by_region[region] = datasets
-        print("Famine dataset loaded for {}".format(region))
+        print("Famine dataset calculated for {}".format(region))
     return datasets_by_region
 
 
