@@ -18,6 +18,12 @@ def region_to_json(region):
     r_hd = dict()
     r_pd = dict()
 
+    rename_map = dict(
+        ipc_df="famine_risk",
+        weather_df="Temperature",
+        conflict_df="{} - Fatalities due to Conflict".format(region)
+    )
+
     region_data = store().per_region_data[region]
     region_pred = store().per_region_pred_data[region]
 
@@ -32,6 +38,8 @@ def region_to_json(region):
                     print(item)
                     item_df = f_df[f_df.Item_Name == item]
                     res[item] = dfcs.JsonStr(dfcs.to_json_string(item_df))
+            elif k in rename_map:
+                res[rename_map[k]] = dfcs.JsonStr(dfcs.to_json_string(v))
             else:
                 res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
 
