@@ -38,3 +38,27 @@ To use simply run the `server.py` script from the src directory
         * Temperature data - "Temperature"
         * Conflict data - "Fatalities"
         * The mapping from feature names to columns can be found in the `_value_columns` list
+        
+Predictions look like this:
+
+```json
+{
+  "success" : true,
+  "region"  : "Awdal",
+  "data"    : {
+    "202001" : {
+      "P2" : {
+        "68" : [0.2, 0.3],
+        "95" : [0.1, 0.4],
+        "mean" : 0.25
+      },
+      "P3" : {...},
+      "P4" : {...}
+    },
+    "202002" : {...},
+    ...
+  }
+}
+```
+
+The dates are in `YYYYQQ` format (QQ = quater from 01 to 04). The 95 and 68 percent confidence intervals are given
