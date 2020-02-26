@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Response
 from flask_restful import Resource
 import pandas as pd
 from config import REGIONS
+from api.utils import DataFrameConverters as dfcs
 
 def app():
     from FamineApp import famine_app
@@ -11,24 +12,34 @@ def store():
     from FamineApp import famine_app
     return famine_app.famine_store
 
+
+
 def region_to_json(region):
     r_hd = dict()
     r_pd = dict()
-    for (k, v) in store().per_region_data[region].items():
-        if isinstance(v, pd.DataFrame):
-            r_hd[k] = v.to_json()
-        elif isinstance(v, list):
-            r_hd[k] = v
-        else:
-            r_hd[k] = str(v)
+
+    region_data = store().per_region_data[region]
+    region_pred = store().per_region_pred_data[region]
+
+    for (data,res) in [(region_data, r_hd), (region_pred, r_pd)]:
+        for (k, v) in data.items():
+            if k[0] == "_":
+                res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
+            elif k == "food_df" or k == "ffood_df":
+                f_df = v
+                print(f_df)
+                for item in data["_food_item_names"] if k[0:2] == "fo" else data["_ffood_item_names"]:
+                    print(item)
+                    item_df = f_df[f_df.Item_Name == item]
+                    res[item] = dfcs.JsonStr(dfcs.to_json_string(item_df))
+            else:
+                res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
 
     for (k, v) in store().per_region_pred_data[region].items():
-        if isinstance(v, pd.DataFrame):
-            r_pd[k] = v.to_json()
-        elif isinstance(v, list):
-            r_pd[k] = v
+        if k[0] == "_":
+            pass
         else:
-            r_pd[k] = str(v)
+            r_pd[k] = dfcs.to_json_string(v)
     return (r_hd, r_pd)
 
 
@@ -46,12 +57,15 @@ class AllDataEndpoint(Resource):
                 historical_data[region] = {}
                 predicted_data[region] = {}
 
+
+
         response = dict(
             success = True,
             historical_data = historical_data,
             predicted_data = predicted_data
         )
         return response
+
 
 class GetRegionDataEndpoint(Resource):
 
@@ -61,17 +75,15 @@ class GetRegionDataEndpoint(Resource):
 
         if region not in store().FITTED_REGIONS:
             return dict(success = False, error="Region not fitted: not enough data")
-        historical_data = dict()
-        predicted_data = dict()
 
-        historical_data[region], predicted_data[region] = region_to_json(region)
+        historical_data, predicted_data = region_to_json(region)
 
-        response = dict(
+        response = dfcs.to_json_string(dict(
             success=True,
             historical_data=historical_data,
             predicted_data=predicted_data
-        )
-        return response
+        ))
+        return Response(response, mimetype="application/json")
 
 
 class RegionsListEndpoint(Resource):

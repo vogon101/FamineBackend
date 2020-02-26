@@ -102,9 +102,11 @@ def get_famine_data(region):
     ## Food Data
     food_df = pd.read_csv(DATA_DIR + 'clean_food.csv')
     food_df = food_df[food_df.Region.eq(region)]
+    food_df["Item_Name"] = food_df.Item + " - " + food_df.Market
     data['food_df'] = food_df
 
     food_items = sorted(set(food_df.Item.values))
+    food_item_names = sorted(set(food_df.Item_Name.values))
     for food_item in food_items:
         market = food_df[food_df.Item.eq(food_item)].Market.values[0]
         feature_names.append("{} - {}".format(food_item, market))
@@ -120,9 +122,11 @@ def get_famine_data(region):
     ffood_df = ffood_df[ffood_df.Item.isin(WANTEDFEWSFOOD) & ffood_df.Region.eq(region)]
     ffood_df = ffood_df[(ffood_df.Year.eq(e_y) & ffood_df.Quarter.ge(e_q)) | (ffood_df.Year.gt(e_y))]
     ffood_df = ffood_df[(ffood_df.Year.eq(l_y) & ffood_df.Quarter.le(l_q)) | (ffood_df.Year.lt(l_y))]
+    ffood_df["Item_Name"] = ffood_df.Item + " - " + ffood_df.Market
     data['ffood_df'] = ffood_df
 
     ffood_items = sorted(set(ffood_df.Item.values))
+    ffood_item_names = sorted(set(ffood_df.Item_Name.values))
     for ffood_item in ffood_items:
         market = ffood_df[ffood_df.Item.eq(ffood_item)].Market.values[0]
         feature_names.append("{} - {}".format(ffood_item, market))
@@ -224,7 +228,9 @@ def get_famine_data(region):
     data["_end_quarter"] = l_q
 
     data["_food_items"] = food_items
+    data["_food_item_names"] = food_item_names
     data["_ffood_items"] = ffood_items
+    data["_ffood_item_names"] = ffood_item_names
 
     return data
 

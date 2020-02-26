@@ -48,6 +48,7 @@ def predict_data(data, end_year, end_quarter):
                     Quarter = math.ceil(new_month/3)
                 ))
     food_df = food_df.append(new_rows).sort_values(by=['Item', 'Date']).reset_index(drop=True)
+    food_df["Item_Name"] = food_df.Item + " - " + food_df.Market
     new_data['food_df'] = food_df
     
     ffood_items = sorted(set(ffood_df.Item))
@@ -80,6 +81,7 @@ def predict_data(data, end_year, end_quarter):
                     Quarter = math.ceil(new_month/3)
                 ))
     ffood_df = ffood_df.append(new_rows).sort_values(by=['Item', 'Date']).reset_index(drop=True)
+    ffood_df["Item_Name"] = ffood_df.Item + " - " + ffood_df.Market
     new_data['ffood_df'] = ffood_df
     
     new_rows = []
