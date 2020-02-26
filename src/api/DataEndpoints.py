@@ -1,18 +1,8 @@
 from flask import Response
 from flask_restful import Resource
-import pandas as pd
 from config import REGIONS
-from api.utils import DataFrameConverters as dfcs
-
-def app():
-    from FamineApp import famine_app
-    return famine_app
-
-def store():
-    from FamineApp import famine_app
-    return famine_app.famine_store
-
-
+from utils import DataFrameConverters as dfcs
+from utils.utils import store, app
 
 def region_to_json(region):
     r_hd = dict()
@@ -33,9 +23,7 @@ def region_to_json(region):
                 res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
             elif k == "food_df" or k == "ffood_df":
                 f_df = v
-                print(f_df)
                 for item in data["_food_item_names"] if k[0:2] == "fo" else data["_ffood_item_names"]:
-                    print(item)
                     item_df = f_df[f_df.Item_Name == item]
                     res[item] = dfcs.JsonStr(dfcs.to_json_string(item_df))
             elif k in rename_map:
@@ -43,11 +31,6 @@ def region_to_json(region):
             else:
                 res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
 
-    for (k, v) in store().per_region_pred_data[region].items():
-        if k[0] == "_":
-            pass
-        else:
-            r_pd[k] = dfcs.to_json_string(v)
     return (r_hd, r_pd)
 
 
@@ -55,24 +38,27 @@ class AllDataEndpoint(Resource):
 
     def get(self):
 
-        historical_data = dict()
-        predicted_data = dict()
+        region_json = dict()
 
         for region in REGIONS:
             if region in store().FITTED_REGIONS:
-                historical_data[region], predicted_data[region] = region_to_json(region)
+                hd, pd = region_to_json(region)
+                region_json[region] = dict(
+                    fitted=True,
+                    historical_data=hd,
+                    predicted_data=pd
+                )
             else:
-                historical_data[region] = {}
-                predicted_data[region] = {}
+                region_json[region] = dict(
+                    fitted=False
+                )
 
-
-
-        response = dict(
+        response = dfcs.to_json_string(dict(
             success = True,
-            historical_data = historical_data,
-            predicted_data = predicted_data
-        )
-        return response
+            regions=region_json
+        ))
+
+        return Response(response, mimetype="application/json")
 
 
 class GetRegionDataEndpoint(Resource):

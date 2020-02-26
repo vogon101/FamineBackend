@@ -7,6 +7,7 @@ def predict_famine(fit, predicted_data):
     
     all_coeffs = list(map(lambda x: sum(x)/len(x), fit.get_posterior_mean()))
     times = sorted(predicted_data.keys())
+    print(times)
     nFeatures = len(predicted_data[times[0]]['features'])
     al_2, be_2, co_2, k_2 = all_coeffs[0],all_coeffs[1:4],all_coeffs[4:4+nFeatures],all_coeffs[4+nFeatures]
     al_3, be_3, co_3, k_3 = all_coeffs[5+nFeatures],all_coeffs[6+nFeatures:9+nFeatures],all_coeffs[9+nFeatures:9+2*nFeatures],all_coeffs[9+2*nFeatures]
