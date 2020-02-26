@@ -1,7 +1,9 @@
-import pystan
+import os
 import pickle
 from hashlib import md5
-import os
+
+import pystan
+
 from config import STAN_MODEL_CACHE
 
 
@@ -22,7 +24,7 @@ def StanModel_cache(model_code, model_name=None, **kwargs) -> (pystan.StanModel,
             pickle.dump(sm, f)
     else:
         print("Using cached StanModel")
-    return sm,code_hash
+    return sm, code_hash
 
 
 pystan.SM_cache = StanModel_cache

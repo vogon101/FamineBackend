@@ -1,12 +1,14 @@
-from flask_restful import Resource, reqparse
-from flask import Response
-from utils.utils import store
 from copy import deepcopy
-import utils.DataFrameConverters as dfcs
-import famine_prediction
-from data_processing import famine_processing
+
 import pandas as pd
+from flask import Response
+from flask_restful import Resource, reqparse
+
+import famine_prediction
+import utils.DataFrameConverters as dfcs
 from config import REGIONS
+from data_processing import famine_processing
+from utils.utils import store
 
 
 # TODO: Merge this with DataEndpoints
@@ -19,7 +21,7 @@ def transform_data(region_pred, region):
         conflict_df="{} - Fatalities due to Conflict".format(region),
     )
 
-    for (data,res) in [(region_pred, r_pd)]:
+    for (data, res) in [(region_pred, r_pd)]:
         for (k, v) in data.items():
             if k in rename_map:
                 res[rename_map[k]] = v
@@ -39,14 +41,14 @@ def transform_data_back(data, region):
     res = dict()
 
     rename_map = {
-        "famine_risk":"ipc_df",
-        "Temperature":"weather_df",
-        "{} - Fatalities due to Conflict".format(region) : "conflict_df",
-        "_features":"features"
+        "famine_risk": "ipc_df",
+        "Temperature": "weather_df",
+        "{} - Fatalities due to Conflict".format(region): "conflict_df",
+        "_features": "features"
     }
 
     cols = ['Date', 'Region', 'Market', 'Item', 'Price', 'Year', 'Month', 'Quarter',
-       'Item_Name']
+            'Item_Name']
 
     food_df = pd.DataFrame(columns=cols)
     ffood_df = pd.DataFrame(columns=cols)
@@ -100,8 +102,6 @@ class RegionPredictionEndpoint(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument("changes", type=list, location="json", required=True)
         super(RegionPredictionEndpoint, self).__init__()
-
-
 
     def get(self, region):
 

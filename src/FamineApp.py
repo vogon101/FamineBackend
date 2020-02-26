@@ -1,14 +1,14 @@
-from flask import Flask
-from flask_restful import Resource, Api
-from FamineStore import FamineStore
 from multiprocessing import freeze_support
 
+from flask import Flask
+from flask_restful import Api
+
+from FamineStore import FamineStore
 from api.DataEndpoints import *
 from api.PredictionEndpoints import *
 
 
 class FamineApp(object):
-
     famine_store = None
 
     def main(self):
@@ -27,5 +27,6 @@ class FamineApp(object):
         api.add_resource(PredictionSummaryEndpoint, '/prediction/summary')
 
         f_app.run(debug=True, use_reloader=True)
+
 
 famine_app = FamineApp()

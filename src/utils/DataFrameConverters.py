@@ -1,9 +1,12 @@
+import math
+import numbers
+
 import pandas as pd
-import json
-import math, numbers
+
 
 class JsonStr:
     value = None
+
     def __init__(self, v):
         self.value = v
 
@@ -14,21 +17,20 @@ class JsonStr:
 def df_to_json(df: pd.DataFrame) -> JsonStr:
     return JsonStr(to_json_string(
         dict(
-            columns = list(df.columns),
-            rows = [list(row.values) for _, row in df.iterrows()]
+            columns=list(df.columns),
+            rows=[list(row.values) for _, row in df.iterrows()]
         )
     ))
 
 
 def to_json_string(obj) -> str:
-
     if isinstance(obj, dict):
         s = ""
         if len(obj.keys()) == 0:
             s = "{}"
         else:
             s = "{ "
-            for k,v in obj.items():
+            for k, v in obj.items():
                 s += '"{}" : {}, '.format(k, to_json_string(v))
             s = s[:-2] + " }"
         return s

@@ -1,8 +1,10 @@
 from flask import Response
 from flask_restful import Resource
+
 from config import REGIONS
 from utils import DataFrameConverters as dfcs
-from utils.utils import store, app
+from utils.utils import store
+
 
 def region_to_json(region):
     r_hd = dict()
@@ -17,7 +19,7 @@ def region_to_json(region):
     region_data = store().per_region_data[region]
     region_pred = store().per_region_pred_data[region]
 
-    for (data,res) in [(region_data, r_hd), (region_pred, r_pd)]:
+    for (data, res) in [(region_data, r_hd), (region_pred, r_pd)]:
         for (k, v) in data.items():
             if k[0] == "_":
                 res[k] = dfcs.JsonStr(dfcs.to_json_string(v))
@@ -54,7 +56,7 @@ class AllDataEndpoint(Resource):
                 )
 
         response = dfcs.to_json_string(dict(
-            success = True,
+            success=True,
             regions=region_json
         ))
 
@@ -65,10 +67,10 @@ class GetRegionDataEndpoint(Resource):
 
     def get(self, region):
         if region not in REGIONS:
-            return dict(success = False, error="Region does not exist")
+            return dict(success=False, error="Region does not exist")
 
         if region not in store().FITTED_REGIONS:
-            return dict(success = False, error="Region not fitted: not enough data")
+            return dict(success=False, error="Region not fitted: not enough data")
 
         historical_data, predicted_data = region_to_json(region)
 
@@ -84,6 +86,6 @@ class RegionsListEndpoint(Resource):
 
     def get(self):
         return dict(
-            all_regions = REGIONS,
-            fitted_regions = store().FITTED_REGIONS
+            all_regions=REGIONS,
+            fitted_regions=store().FITTED_REGIONS
         )

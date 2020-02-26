@@ -1,11 +1,10 @@
-from data_processing.famine_processing import load_data, calculate_datasets,get_famine_data
-from modelling.StanModel import StanModel
-from data_processing.data_prediction import predict_data
 from config import REGIONS
+from data_processing.data_prediction import predict_data
+from data_processing.famine_processing import load_data, calculate_datasets
+from modelling.StanModel import StanModel
 
 
 class FamineStore(object):
-
     FITTED_REGIONS = []
 
     per_region_data = None
@@ -26,21 +25,20 @@ class FamineStore(object):
             if self.per_region_data[region]:
                 datasets = self.per_region_datasets[region]
                 dates = sorted(datasets.keys())
-                
+
                 nFeatures = len(datasets[dates[0]]['features'])
                 features = [datasets[date]['features'] for date in dates]
                 response_2 = [max(datasets[date]['P2'], 1e-5) for date in dates]
-                response_3 = [max(datasets[date]['P3'], 1e-5)  for date in dates]
-                response_4 = [max(datasets[date]['P4'], 1e-5)  for date in dates]
-                
-            
+                response_3 = [max(datasets[date]['P3'], 1e-5) for date in dates]
+                response_4 = [max(datasets[date]['P4'], 1e-5) for date in dates]
+
                 famine_model_data = dict(
-                    N = len(dates),
-                    K = nFeatures,
-                    feats = features,
-                    response_2 = response_2,
-                    response_3 = response_3,
-                    response_4 = response_4
+                    N=len(dates),
+                    K=nFeatures,
+                    feats=features,
+                    response_2=response_2,
+                    response_3=response_3,
+                    response_4=response_4
                 )
 
                 self.per_region_model[region] = StanModel("FamineModel_Beta", 1, famine_model_data)
