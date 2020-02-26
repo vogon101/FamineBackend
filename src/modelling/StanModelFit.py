@@ -1,9 +1,9 @@
 import pickle
+
 from config import *
 
 
 class StanModelFit(object):
-
     uuid = None
     model = None
     fit = None
@@ -25,8 +25,10 @@ class StanModelFit(object):
             return StanModelFit(model, uuid, fit_obj)
 
     @staticmethod
-    def FromCalculation(model, uuid, iters=1000, chains=4, save=True, control=dict()):
-        model_fit = model.instance.sampling(data=model.fit_data, iter=iters, chains=chains, control = control)
+    def FromCalculation(model, uuid, iters=1000, chains=4, save=True, control=None):
+        if control is None:
+            control = dict()
+        model_fit = model.instance.sampling(data=model.fit_data, iter=iters, chains=chains, control=control)
         if save:
             os.mkdir(STAN_FIT_DIR)
             path = STAN_FIT_DIR + model.name + "_v" + str(model.version) + "_fit_" + str(uuid) + ".fit"

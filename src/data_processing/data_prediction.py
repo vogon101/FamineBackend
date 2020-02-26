@@ -1,10 +1,10 @@
-from data_processing.data_constants import *
-from data_processing.data_utils import *
 import copy
 import math
-import pandas as pd
 
-#Assumed data is per-region already
+from data_processing.data_utils import *
+
+
+# Assumed data is per-region already
 def predict_data(data, end_year, end_quarter):
     print("Calculating prediction data up to q{}/{}".format(end_quarter, end_year))
     new_data = copy.deepcopy(data)
@@ -12,115 +12,117 @@ def predict_data(data, end_year, end_quarter):
     ffood_df = new_data['ffood_df']
     weather_df = new_data['weather_df']
     conflict_df = new_data['conflict_df']
-    
+
     new_data["_end_year"] = end_year
     new_data["_end_quarter"] = end_quarter
-    
-    
+
     end_month = [0, 3, 6, 9, 12][end_quarter]
     end_day = [0, 31, 30, 30, 31][end_quarter]
 
     new_rows = []
     food_items = sorted(set(food_df.Item.values))
     for item in food_items:
-        
+
         t_item_df = food_df[food_df.Item.eq(item)]
-        
+
         market = t_item_df.Market.values[0]
         region = t_item_df.Region.values[0]
         last_year = max(t_item_df.Year.values)
         last_quarter = max(t_item_df[t_item_df.Year.eq(last_year)].Quarter.values)
         last_month = max(t_item_df[t_item_df.Year.eq(last_year)].Month.values)
         last_price = t_item_df.loc[t_item_df.Year.eq(last_year) & t_item_df.Month.eq(last_month)].Price.values[0]
-        
-        for new_year in range(last_year, end_year+1):
-            month_start = last_month+1 if new_year == last_year else 1
-            month_end = end_month+1 if new_year == end_year else 13
+
+        for new_year in range(last_year, end_year + 1):
+            month_start = last_month + 1 if new_year == last_year else 1
+            month_end = end_month + 1 if new_year == end_year else 13
             for new_month in range(month_start, month_end):
                 new_rows.append(dict(
-                    Date = getDate(new_year, new_month, 1),
-                    Region = region,
-                    Market = market,
-                    Item = item,
-                    Price = last_price,
-                    Year = new_year,
-                    Month = new_month,
-                    Quarter = math.ceil(new_month/3)
+                    Date=getDate(new_year, new_month, 1),
+                    Region=region,
+                    Market=market,
+                    Item=item,
+                    Price=last_price,
+                    Year=new_year,
+                    Month=new_month,
+                    Quarter=math.ceil(new_month / 3)
                 ))
     food_df = food_df.append(new_rows).sort_values(by=['Item', 'Date']).reset_index(drop=True)
+    food_df["Item_Name"] = food_df.Item + " - " + food_df.Market
     new_data['food_df'] = food_df
-    
+
     ffood_items = sorted(set(ffood_df.Item))
-    new_rows=[]
+    new_rows = []
     for item in ffood_items:
-        
+
         t_item_df = ffood_df[ffood_df.Item.eq(item)]
-        
+
         market = t_item_df.Market.values[0]
         region = t_item_df.Region.values[0]
         last_year = max(t_item_df.Year.values)
         last_quarter = max(t_item_df[t_item_df.Year.eq(last_year)].Quarter.values)
         last_month = max(t_item_df[t_item_df.Year.eq(last_year)].Month.values)
         last_price = t_item_df.loc[t_item_df.Year.eq(last_year) & t_item_df.Month.eq(last_month)].Price.values[0]
-        
-        for new_year in range(last_year, end_year+1):
-            if(last_month==12 and new_year == last_year):
+
+        for new_year in range(last_year, end_year + 1):
+            if (last_month == 12 and new_year == last_year):
                 continue
-            month_start = last_month+1 if new_year == last_year else 1
-            month_end = end_month+1 if new_year == end_year else 13
+            month_start = last_month + 1 if new_year == last_year else 1
+            month_end = end_month + 1 if new_year == end_year else 13
             for new_month in range(month_start, month_end):
                 new_rows.append(dict(
-                    Date = getDate(new_year, new_month, 1),
-                    Region = region,
-                    Market = market,
-                    Item = item,
-                    Price = last_price,
-                    Year = new_year,
-                    Month = new_month,
-                    Quarter = math.ceil(new_month/3)
+                    Date=getDate(new_year, new_month, 1),
+                    Region=region,
+                    Market=market,
+                    Item=item,
+                    Price=last_price,
+                    Year=new_year,
+                    Month=new_month,
+                    Quarter=math.ceil(new_month / 3)
                 ))
     ffood_df = ffood_df.append(new_rows).sort_values(by=['Item', 'Date']).reset_index(drop=True)
+    ffood_df["Item_Name"] = ffood_df.Item + " - " + ffood_df.Market
     new_data['ffood_df'] = ffood_df
-    
+
     new_rows = []
     region = conflict_df.Region.values[0]
     last_year = max(conflict_df.Year.values)
     last_month = max(conflict_df[conflict_df.Year.eq(last_year)].Month.values)
-    last_fatality = conflict_df.loc[conflict_df.Year.eq(last_year) & conflict_df.Month.eq(last_month)].Fatalities.values[0]
-    
-    for new_year in range(last_year, end_year+1):
-        month_start = last_month+1 if new_year == last_year else 1
-        month_end = end_month+1 if new_year == end_year else 13
+    last_fatality = \
+    conflict_df.loc[conflict_df.Year.eq(last_year) & conflict_df.Month.eq(last_month)].Fatalities.values[0]
+
+    for new_year in range(last_year, end_year + 1):
+        month_start = last_month + 1 if new_year == last_year else 1
+        month_end = end_month + 1 if new_year == end_year else 13
         for new_month in range(month_start, month_end):
             new_rows.append(dict(
-                Region = region,
-                Date = getDate(new_year, new_month, 1),
-                Fatalities = last_fatality,
-                Year = new_year,
-                Month = new_month,
-                Quarter = math.ceil(new_month/3)
+                Region=region,
+                Date=getDate(new_year, new_month, 1),
+                Fatalities=last_fatality,
+                Year=new_year,
+                Month=new_month,
+                Quarter=math.ceil(new_month / 3)
             ))
     conflict_df = conflict_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['conflict_df'] = conflict_df
-    
+
     new_rows = []
     station = weather_df.Station.values[0]
     last_year = max(weather_df.Year.values)
     last_month = max(weather_df[weather_df.Year.eq(last_year)].Month.values)
     last_temperature = weather_df[weather_df.Year.eq(last_year) & weather_df.Month.eq(last_month)].Temperature.values[0]
-    
-    for new_year in range(last_year, end_year+1):
-        month_start = last_month+1 if new_year == last_year else 1
-        month_end = end_month+1 if new_year == end_year else 13
+
+    for new_year in range(last_year, end_year + 1):
+        month_start = last_month + 1 if new_year == last_year else 1
+        month_end = end_month + 1 if new_year == end_year else 13
         for new_month in range(month_start, month_end):
             new_rows.append(dict(
-                Station = station,
-                Date = getDate(new_year, new_month, 1),
-                Temperature = last_temperature,
-                Year = new_year,
-                Month = new_month,
-                Quarter = math.ceil(new_month/3)
-            ))    
+                Station=station,
+                Date=getDate(new_year, new_month, 1),
+                Temperature=last_temperature,
+                Year=new_year,
+                Month=new_month,
+                Quarter=math.ceil(new_month / 3)
+            ))
     weather_df = weather_df.append(new_rows).sort_values(by=['Date']).reset_index(drop=True)
     new_data['weather_df'] = weather_df
     new_data["_food_items"] = food_items
@@ -162,4 +164,3 @@ def predict_data(data, end_year, end_quarter):
     new_data['datasets'] = datasets
     """
     return new_data
-        

@@ -1,12 +1,11 @@
 import pystan
-from modelling.stan_utils import StanModel_cache
-import pickle
+
 from config import *
 from modelling import StanModelFit
+from modelling.stan_utils import StanModel_cache
 
 
 class StanModel(object):
-
     name = None
     version = None
     code_path = None
@@ -34,7 +33,9 @@ class StanModel(object):
     def fit(self):
         return self.__fit
 
-    def get_fit(self, dataid, iters=1000, chains=4, control = dict()):
+    def get_fit(self, dataid, iters=1000, chains=4, control=None):
+        if control is None:
+            control = dict()
         uuid = dataid + "_" + self.code_hash
         if self.fit is not None and self.fit.uuid == uuid:
             return self.fit
@@ -49,12 +50,3 @@ class StanModel(object):
                 else:
                     raise Exception("Data not available for fitting model")
         return self.fit
-
-
-
-
-
-
-
-
-
