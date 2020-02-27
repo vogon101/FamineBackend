@@ -2,6 +2,7 @@ from multiprocessing import freeze_support
 
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS
 
 from FamineStore import FamineStore
 from api.DataEndpoints import *
@@ -15,6 +16,7 @@ class FamineApp(object):
         freeze_support()
 
         f_app = Flask(__name__)
+        cors = CORS(f_app, resources={r"/*": {"origins": "*"}})
         api = Api(f_app)
 
         self.famine_store = FamineStore()
