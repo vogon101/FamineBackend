@@ -46,7 +46,7 @@ class StanModel(object):
                 print("Failed to load fit with exception " + str(e))
                 if self.fit_data is not None:
                     print("Attempting to fit the model from given data")
-                    self.__fit = StanModelFit.StanModelFit.FromCalculation(self, uuid, iters, chains, control)
+                    self.__fit = StanModelFit.StanModelFit.FromCalculation(self, uuid, iters, chains, save=True, control = control)
                 else:
                     raise Exception("Data not available for fitting model")
         return self.fit

@@ -30,7 +30,8 @@ class StanModelFit(object):
             control = dict()
         model_fit = model.instance.sampling(data=model.fit_data, iter=iters, chains=chains, control=control)
         if save:
-            os.mkdir(STAN_FIT_DIR)
+            if (not os.path.exists(STAN_FIT_DIR)):
+                os.mkdir(STAN_FIT_DIR)
             path = STAN_FIT_DIR + model.name + "_v" + str(model.version) + "_fit_" + str(uuid) + ".fit"
             print("Saving model fit to {}".format(path))
 
