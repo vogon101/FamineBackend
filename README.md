@@ -3,7 +3,7 @@
 This needs python 3 along with the following modules:
 * Pystan: https://pystan.readthedocs.io/en/latest/getting_started.html
 * numpy, pandas
-* flask, flask-restful
+* flask, flask-restful, flask-cors
 
 To use simply run the `server.py` script from the src directory
 
