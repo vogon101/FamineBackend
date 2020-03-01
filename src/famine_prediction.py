@@ -41,7 +41,7 @@ def predict_famine(fit, predicted_data):
             P2_a, P2_b = P2_mean * k_2, (1 - P2_mean) * k_2
             P3_a, P3_b = P3_mean * k_3, (1 - P3_mean) * k_3
             P4_a, P4_b = P4_mean * k_4, (1 - P4_mean) * k_4
-            print(P3_mean, k_3)
+
             P2_95 = (scipy.stats.beta.ppf(0.025, P2_a, P2_b), scipy.stats.beta.ppf(0.975, P2_a, P2_b))
             P2_68 = (scipy.stats.beta.ppf(0.16, P2_a, P2_b), scipy.stats.beta.ppf(0.84, P2_a, P2_b))
             prediction['P2'] = {'mean': P2_mean, '95': P2_95, '68': P2_68}
@@ -73,4 +73,4 @@ if __name__ == "__main__":
 
     # print(store.per_region_pred_data["Awdal"]["ipc_df"])
 
-    predict_famine(store.per_region_model["Awdal"].fit.fit, store.per_region_pred_datasets["Awdal"])
+    #predict_famine(store.per_region_model["Awdal"].fit.fit, store.per_region_pred_datasets["Awdal"])
