@@ -141,7 +141,7 @@ def get_famine_data(region):
 
     # Aggregate over months
     monthly_conflict_df = pd.DataFrame(columns=["Region", "Date", "Fatalities", "Year", "Month", "Quarter"])
-    for year in range(e_y, l_y):
+    for year in range(e_y, l_y+1):
         f_q = e_q if year == e_y else 1
         s_q = l_q if year == l_y else 4
         for quarter in range(f_q, s_q + 1):
