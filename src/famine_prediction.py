@@ -73,4 +73,4 @@ if __name__ == "__main__":
 
     # print(store.per_region_pred_data["Awdal"]["ipc_df"])
 
-    predict_famine(store.per_region_model["Awdal"].fit.fit, store.per_region_pred_datasets["Awdal"])
+    #predict_famine(store.per_region_model["Awdal"].fit.fit, store.per_region_pred_datasets["Awdal"])
